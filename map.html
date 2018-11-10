@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8">
+	<title>Heatmaps</title>
+	<style>
+		/* Always set the map height explicitly to define the size of the div
+		* element that contains the map. */
+		#map {
+		height: 100%;
+		}
+		/* Optional: Makes the sample page fill the window. */
+		html, body {
+		height: 100%;
+		margin: 0;
+		padding: 0;
+		}
+		#floating-panel {
+		position: absolute;
+		top: 10px;
+		left: 25%;
+		z-index: 5;
+		background-color: #fff;
+		padding: 5px;
+		border: 1px solid #999;
+		text-align: center;
+		font-family: 'Roboto','sans-serif';
+		line-height: 30px;
+		padding-left: 10px;
+		}
+		#floating-panel {
+		background-color: #fff;
+		border: 1px solid #999;
+		left: 25%;
+		padding: 5px;
+		position: absolute;
+		top: 10px;
+		z-index: 5;
+		}
+	</style>
+</head>
+<html>
+<body style="width:100vw;height:100vh;">
+	<div id="floating-panel">
+		<button onclick="toggleHeatmap()">Toggle Heatmap</button>
+		<button onclick="changeGradient()">Change gradient</button>
+		<button onclick="changeRadius()">Change radius</button>
+		<button onclick="clearMarkers()">Hide Markers</button>
+		<button onclick="showMarkers()">Show All Markers</button>
+		<label for="chooseHeatmap" class="btn">Heatmap</label>
+		<input type="file" id="chooseHeatmap"/>
+		<label for="chooseHeatmap" class="btn">Markers</label>
+		<input buttonText="Your label here." type="file" id="chooseMarker"/>
+	</div>
+	<div id="map"></div>
+
+<script>
+	var map, heatmap;
+	var locationData = new Array();
+
+	function initMap() {
+		map = new google.maps.Map(document.getElementById('map'), {
+			zoom: 5,
+			center: {lat: 39.5, lng: -98.35},
+			mapTypeId: 'roadmap'
+		});
+
+		heatmap = new google.maps.visualization.HeatmapLayer({
+			data: locationData,
+			map: map
+		});
+	}
+
+	function changeRadius() {
+		heatmap.set('radius', heatmap.get('radius') ? null : 20);
+	}
+
+	function toggleHeatmap() {
+		heatmap.setMap(heatmap.getMap() ? null : map);
+		}
+
+	function changeGradient() {
+		var gradient = [
+			'rgba(0, 255, 255, 0)',
+			'rgba(0, 255, 255, 1)',
+			'rgba(0, 191, 255, 1)',
+			'rgba(0, 127, 255, 1)',
+			'rgba(0, 63, 255, 1)',
+			'rgba(0, 0, 255, 1)',
+			'rgba(0, 0, 223, 1)',
+			'rgba(0, 0, 191, 1)',
+			'rgba(0, 0, 159, 1)',
+			'rgba(0, 0, 127, 1)',
+			'rgba(63, 0, 91, 1)',
+			'rgba(127, 0, 63, 1)',
+			'rgba(191, 0, 31, 1)',
+			'rgba(255, 0, 0, 1)'
+		]
+
+		heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
+	}
+
+	function toggleHeatmap() {
+		heatmap.setMap(heatmap.getMap() ? null : map);
+	}
+
+	function addMarker(location) {
+		//location must be a new google.maps.LatLng object
+		var marker = new google.maps.Marker({
+			position: location,
+			map: map
+		});
+	}
+
+	function createHeatmap () {
+		heatmap = new google.maps.visualization.HeatmapLayer({
+          data: locationData,
+          map: map
+        });
+	}
+
+	function applyFile(evt) {
+		var files = evt.target.files;
+		var marker
+
+		var reader = new FileReader();
+		reader.onload = function(event) {
+			var jsonContent = JSON.parse(event.target.result)
+			for (var i = jsonContent.length - 1; i >= 0; i--) {
+				//addMarker(new google.maps.LatLng(jsonContent[i].coor[0] + Math.random() * .1 - .05, jsonContent[i].coor[1] + Math.random() * .1 - .05 ))
+				locationData.push(new google.maps.LatLng(jsonContent[i].coor[0], jsonContent[i].coor[1]))
+			}
+			createHeatmap();
+		};
+
+		if (files[0].name.split(".").slice(-1) != "json") {
+			alert("Not a JSON File");
+		} else {
+			alert("Loading JSON");
+			reader.readAsText(files[0]);
+		}
+	}
+
+	function applyMarkers(evt) {
+		var files = evt.target.files;
+		var marker
+
+		var reader = new FileReader();
+		reader.onload = function(event) {
+			var jsonContent = JSON.parse(event.target.result)
+			for (var i = jsonContent.length - 1; i >= 0; i--) {
+				addMarker(new google.maps.LatLng(jsonContent[i].coor[0] + Math.random() * .1 - .05, jsonContent[i].coor[1] + Math.random() * .1 - .05 ))
+				//locationData.push(new google.maps.LatLng(jsonContent[i].coor[0], jsonContent[i].coor[1]))
+			}
+			//createHeatmap();
+		};
+
+		if (files[0].name.split(".").slice(-1) != "json") {
+			alert("Not a JSON File");
+		} else {
+			alert("Loading JSON");
+			reader.readAsText(files[0]);
+		}
+	}
+
+	document.getElementById('chooseHeatmap').addEventListener('change', applyFile)
+	document.getElementById('chooseMarker').addEventListener('change', applyMarkers)
+
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAiSe60jurDVvGNFThhxnwwBwfrhBMdHPI&libraries=visualization&callback=initMap"></script>
+<!--
+To use this code on your website, get a free API key from Google.
+Read more at: https://www.w3schools.com/graphics/google_maps_basic.asp
+-->
+
+</body>
+</html>
